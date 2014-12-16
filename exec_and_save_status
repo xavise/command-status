@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# Execute command and save output and exit status in given directory.
+# Resulting output files are:
+#    cmdline : Complete command-line and arguments
+#    stdout  : Resulting STDOUT
+#    stderr  : Resulting STDERR
+#    status  : Command exit status
+
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+usage () {
+	echo "Usage: $0 {status_dir} {command} [argument [...]]" 1>&2
+	exit 1
+}
+
+check_status_dir () {
+	[ -d "$STATUS_DIR" ] && [ -w "$STATUS_DIR" ] && return 0
+	echo "$0: Invalid status directory '$STATUS_DIR'" 1>&2
+	exit 1
+}
+
+case $# in
+	0|1)
+		usage
+		# NOTREACHED
+		;;
+esac
+
+STATUS_DIR="$1"
+check_status_dir "$STATUS_DIR"
+shift
+
+# Command line.
+# File timestamp marks beginning of execution.
+echo "$@" >"$STATUS_DIR/cmdline"
+
+# Status file is created and truncated.
+cat /dev/null >"$STATUS_DIR/status"
+
+# Execution, capturing output.
+"$@" 1>"$STATUS_DIR/stdout" 2>"$STATUS_DIR/stderr" &
+wait %1
+
+# Exit status.
+echo "$?" >"$STATUS_DIR/status"
+
+# End of process.
+exit 0
+

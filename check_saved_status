@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# Check status of previously executed command, saved in given directory.
+# Output (stdout and stderr) is printed as is.
+# Command exits with saved exit status.
+
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+usage () {
+	echo "Usage: $0 {status_dir}" 1>&2
+	exit 1
+}
+
+check_status_dir () {
+	[ -d "$STATUS_DIR" ] \
+		&& [ -r "$STATUS_DIR/cmdline" ] \
+		&& [ -r "$STATUS_DIR/stdout"  ] \
+		&& [ -r "$STATUS_DIR/stderr"  ] \
+		&& [ -r "$STATUS_DIR/status"  ] \
+		&& return 0
+
+	echo "$0: Invalid status directory '$STATUS_DIR'" 1>&2
+	exit 1
+}
+
+case $# in
+	1)
+		;;
+	*)
+		usage
+		# NOTREACHED
+		;;
+esac
+
+STATUS_DIR="$1"
+check_status_dir "$STATUS_DIR"
+
+cat "$STATUS_DIR/stderr" 1>&2
+cat "$STATUS_DIR/stdout"
+
+STATUS=`cat "$STATUS_DIR/status"`
+exit $STATUS
+

@@ -5,12 +5,54 @@
 # Command exits with saved exit status.
 
 
+
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+
+
 usage () {
-	echo "Usage: $0 {status_dir}" 1>&2
+	echo "Usage: $0 [--purge] {status_dir}" 1>&2
 	exit 1
 }
+
+
+
+get_options () {
+	ARGS=`getopt -n "$0" -o p --long purge -- "$@"`
+	[ $? -eq 0 ] || usage
+
+	PURGE=
+	eval set -- "$ARGS"
+	while true ; do
+		case "$1" in
+			-p|--purge)
+				PURGE=1
+				shift
+				;;
+			--)
+				shift
+				break
+				;;
+			*)
+				usage
+				# NOTREACHED
+				;;
+		esac
+	done
+
+	case $# in
+		1)
+			STATUS_DIR="$1"
+			shift
+			;;
+		*)
+			usage
+			# NOTREACHED
+			;;
+	esac
+}
+
+
 
 check_status_dir () {
 	[ -d "$STATUS_DIR" ] \
@@ -24,21 +66,25 @@ check_status_dir () {
 	exit 1
 }
 
-case $# in
-	1)
-		;;
-	*)
-		usage
-		# NOTREACHED
-		;;
-esac
 
-STATUS_DIR="$1"
+
+purge_status_dir () {
+	rm -f "$STATUS_DIR/cmdline" \
+	      "$STATUS_DIR/stdout"  \
+	      "$STATUS_DIR/stderr"  \
+	      "$STATUS_DIR/status"
+}
+
+
+
+get_options "$@"
 check_status_dir "$STATUS_DIR"
 
 cat "$STATUS_DIR/stderr" 1>&2
 cat "$STATUS_DIR/stdout"
 
 STATUS=`cat "$STATUS_DIR/status"`
+[ -n "$PURGE" ] && purge_status_dir
+
 exit $STATUS
 

@@ -56,10 +56,10 @@ get_options () {
 
 check_status_dir () {
 	[ -d "$STATUS_DIR" ] \
-		&& [ -r "$STATUS_DIR/cmdline" ] \
+		&& [ -L "$STATUS_DIR/cmdline" ] \
 		&& [ -r "$STATUS_DIR/stdout"  ] \
 		&& [ -r "$STATUS_DIR/stderr"  ] \
-		&& [ -r "$STATUS_DIR/status"  ] \
+		&& [ -L "$STATUS_DIR/status"  ] \
 		&& return 0
 
 	echo "$0: Invalid status directory '$STATUS_DIR'" 1>&2
@@ -83,7 +83,7 @@ check_status_dir "$STATUS_DIR"
 cat "$STATUS_DIR/stderr" 1>&2
 cat "$STATUS_DIR/stdout"
 
-STATUS=`cat "$STATUS_DIR/status"`
+STATUS=`readlink -n "$STATUS_DIR/status"`
 [ -n "$PURGE" ] && purge_status_dir
 
 exit $STATUS

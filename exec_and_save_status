@@ -2,10 +2,10 @@
 
 # Execute command and save output and exit status in given directory.
 # Resulting output files are:
-#    cmdline : Complete command-line and arguments
+#    cmdline : Complete command-line and arguments (as a symlink)
 #    stdout  : Resulting STDOUT
 #    stderr  : Resulting STDERR
-#    status  : Command exit status
+#    status  : Command exit status (as a symlink)
 
 
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -34,7 +34,8 @@ shift
 
 # Command line.
 # File timestamp marks beginning of execution.
-echo "$@" >"$STATUS_DIR/cmdline"
+# Note use of "$*", not "$@".
+ln -sf "$*" "$STATUS_DIR/cmdline"
 
 # Status file is created and truncated.
 cat /dev/null >"$STATUS_DIR/status"
@@ -44,7 +45,7 @@ cat /dev/null >"$STATUS_DIR/status"
 wait %1
 
 # Exit status.
-echo "$?" >"$STATUS_DIR/status"
+ln -sf "$?" "$STATUS_DIR/status"
 
 # End of process.
 exit 0

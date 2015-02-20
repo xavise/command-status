@@ -11,22 +11,32 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 
 usage () {
-	echo "Usage: $0 [--purge] {status_dir}" 1>&2
+	cat <<E-O-F 1>&2
+Usage: $0 [options] {status_dir}
+Valid options are:
+  --purge    Delete saved status files
+  --quiet    Do not output anything, just exit with saved exit status
+E-O-F
 	exit 1
 }
 
 
 
 get_options () {
-	ARGS=`getopt -n "$0" -o p --long purge -- "$@"`
+	ARGS=`getopt -n "$0" -o pq --long purge,quiet -- "$@"`
 	[ $? -eq 0 ] || usage
 
 	PURGE=
+	QUIET=
 	eval set -- "$ARGS"
 	while true ; do
 		case "$1" in
 			-p|--purge)
 				PURGE=1
+				shift
+				;;
+			-q|--quiet)
+				QUIET=1
 				shift
 				;;
 			--)
@@ -80,8 +90,10 @@ purge_status_dir () {
 get_options "$@"
 check_status_dir "$STATUS_DIR"
 
-cat "$STATUS_DIR/stderr" 1>&2
-cat "$STATUS_DIR/stdout"
+if [ -z "$QUIET" ]; then
+	cat "$STATUS_DIR/stderr" 1>&2
+	cat "$STATUS_DIR/stdout"
+fi
 
 STATUS=`readlink -n "$STATUS_DIR/status"`
 [ -n "$PURGE" ] && purge_status_dir

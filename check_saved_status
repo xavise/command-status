@@ -98,5 +98,12 @@ fi
 STATUS=`readlink -n "$STATUS_DIR/status"`
 [ -n "$PURGE" ] && purge_status_dir
 
+if [ "$STATUS" = 'undef' ]; then
+	# Execution may still be in progress, or exit status might not
+	# be correctly set.
+	[ -z "$QUIET" ] && echo "$0: Undefined saved status in '$STATUS_DIR' (execution still in progress?)" 1>&2
+	exit 255
+fi
+
 exit $STATUS
 

@@ -37,8 +37,10 @@ shift
 # Note use of "$*", not "$@".
 ln -sf "$*" "$STATUS_DIR/cmdline"
 
-# Status file is created and truncated.
-cat /dev/null >"$STATUS_DIR/status"
+# Status file is initialized with special value 'undef'.
+# Useful to detect if execution may still be in progress, or if exit status
+# has not been correctly set.
+ln -sf undef "$STATUS_DIR/status"
 
 # Execution, capturing output.
 "$@" 1>"$STATUS_DIR/stdout" 2>"$STATUS_DIR/stderr" &

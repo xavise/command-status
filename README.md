@@ -13,10 +13,10 @@ Utilities
 
     Creates these files in status directory:
 
-      * cmdline : Complete command-line and arguments
+      * cmdline : Complete command-line and arguments (symlink)
       * stdout  : Resulting STDOUT
       * stderr  : Resulting STDERR
-      * status  : Command exit status
+      * status  : Command exit status (symlink)
 
   * check_saved_status
 
